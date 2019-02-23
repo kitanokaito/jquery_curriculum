@@ -95,6 +95,8 @@ $('#q6').click(function() {
   }, 2000)
 });
 // 第7問  id='q7'の子要素をクリックしたら、その要素のインデックス（何番目か）をconsole.log()とalert()を用いて表示させよ。
+//$('#q7 li)
+//$('#q7').find('li')
 $('#q7').children('li').click(function() {
   var index = $(this).index();
   alert(index);
@@ -111,7 +113,7 @@ $('#q8').hover(
   );
 // 第9問  id='q9'の要素をクリックしたらこの要素に設定してあるdata属性をconsoleに表示せよ。
 $('#q9').click(function() {
-  console.log($(this).data())
+  console.log($(this).data('text'))
 });
 // 第10問 id='q10'の子要素をクリックしたら、その要素のインデックスと等しいid='q11'の子要素にlargeというクラスを追加せよ。
 $('#q10').children().click(function() {

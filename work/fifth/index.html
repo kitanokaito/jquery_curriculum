@@ -99,26 +99,23 @@
       // $().each() DOM要素を1つずつループ処理をする（ループ内で$(this)を使うと要素がひとつずつ取得できる）
       $('.select').change(function() {
         var checkCategory = $(this).find('option:checked').text().toLowerCase();
+        // var $(this).val();
         console.log(checkCategory);
 
         var showCategory = $('.list').children();
-        $(showCategory).each(function(index) {
-          $('.list').children().eq(index).hide();
-        });
+        $('.list').find('li').hide();
 
-        if(checkCategory == "all") {
+        if(checkCategory === "all") {
+          $('.list').find('li').show();
+        } else {
           $(showCategory).each(function(index) {
-            $('.list').children().eq(index).show();
-          }); 
-        } 
-
-        $(showCategory).each(function(index) {
-          // console.log(index);
-          var categoryType = $(this).data("categoryType");
-          if(checkCategory == categoryType) {
-            $('.list').children().eq(index).show();
-          }
-        });
+            // console.log(index);
+            var categoryType = $(this).data("categoryType");
+            if(checkCategory === categoryType) {
+              $('.list').children().eq(index).show();
+            }
+          });
+        }
       })
     </script>
   </body>

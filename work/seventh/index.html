@@ -35,49 +35,41 @@
       // .width() 要素の幅を取得します。
       // .length 要素の個数を取得します。
 
-      // $(function() {
+      $(function() {
         var position = 0;
-        var sliderSize = $('.slider-list').children().width();
-        var slideNum = $('.slider-list').children().length - 1;
-        var slideWidth = []
+        var imagesize = 0;
+        var sliderLists = $('.slider-list').children();
+        var slideWidth = [];
 
-        for(var i=0; i<=slideNum; i++) {
-          slideWidth[i]=sliderSize*i;
-          console.log(slideWidth[i]);
-        }
-      // });
-
-      $('.slider-ctrl-btn').click(function() {
-        if($(this).data("ctrl") == 'prev') {
-          position--;
-          if(position < 0) {
-            position=slideNum;
+        $(sliderLists).each(function(index) {
+          if(index === 0) {
+            slideWidth.push(index);
+          } else {
+            imagesize += $(this).width();
+            slideWidth.push(imagesize);
+            console.log(slideWidth);
           }
-        } else 
-        {
-          position++;
-          if(position > slideNum) {
-            position = 0;
-          }
-        }
-        console.log(position);
-        console.log(slideWidth[position]);
-        $('.slider-list').animate({
-          left: -slideWidth[position]
         });
 
-      })
-      // $('.slider-ctrl-btn').click(function() {
-      //   var slideNum = $('.slider-list').children().length - 1;
-      //   var width = $('.slider-list').children().width() * slideNum;
+        $('.slider-ctrl-btn').click(function() {
+          if($(this).data("ctrl") == 'prev') {
+            position--;
+            if(position < 0) {
+              position=sliderLists.length-1;
+            }
+          } else {
+            position++;
+            if(position > sliderLists.length-1) {
+              position = 0;
+            }
+          }
+          $('.slider-list').animate({
+            left: -slideWidth[position]
+          });
 
+        });
+      });
 
-      //   console.log(slideNum);
-      //   console.log(width);
-      //   $('.slider-list').animate(function() {
-      //     left: -width;
-      //   });
-      // });
     </script>
   </body>
 </html>

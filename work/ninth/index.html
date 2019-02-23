@@ -24,12 +24,32 @@
       // $.ajax({}) 外部ファイルやURLに対してデータをリクエストすることができます。これだけだと少しわからないと思うので下に文法を書いておきます。
       //
       // [文法]
-      // $.ajax({
-      //   url: './data.json'
-      // })
-      // .done(function(data) {
-      //   console.log(data);
-      // });
+      // var dat;
+
+      //ajax通信をして./data.jsonにあるオブジェクトを取得してdataに格納している
+      $.ajax({
+        url: './data.json',
+        dataType: 'json'
+      })
+      //dataへの格納がうまく行った時に以下の関数が走る
+      .done(function(data) {
+        var dataLength = data.colorsArray.length;
+        var appendText = '';
+
+        for(var i=0; i<dataLength; i++) {
+          var name = data.colorsArray[i].colorName;
+          var color =  data.colorsArray[i].hexValue;
+
+          appendText += '<li style="background-color:' + color +';" class=colorList__item>' + 
+                          '<p class="colorList__title">' + name + '</p>' +
+                        '</li>';
+        }
+        $('.colorList').html(appendText);
+        
+      }).fail({
+
+      });
+
       //
       // 今回の場合は同じ階層にあるdata.jsonに対してリクエストを飛ばして、中にあるオブジェクトを取得します。
       // そのオブジェクトは

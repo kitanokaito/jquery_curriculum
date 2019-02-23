@@ -58,7 +58,9 @@
       // .stop() 現在動作中のアニメーション処理を全て中止します
       $('.menu__list__title').hover(
         function() {
+          $(this).next().stop()
           $(this).next().slideDown()
+          
         },
         function() {
           $(this).next().stop()

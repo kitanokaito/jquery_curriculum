@@ -21,6 +21,7 @@
           </div>
           <button id="js-search-button" class="search__btn">検索する</button>
         </div>
+        <div class="error"></div>
         <ul class="lists"></ul>
       </div>
     </div>
@@ -51,19 +52,143 @@
       // http://qiita.com/marumaru8228/items/65fc684383b096f0e548
       //
       //
-      // $.ajax({
-      //   url: 'https://app.rakuten.co.jp/services/api/BooksTotal/Search/20130522',
-      //   type: 'GET',
-      //   datatype: 'json',
-      //   data: {
-      //     // 「区分:サービス固有パラメーター」を確認して、必要な情報をdata内に入れましょう。
-      //     applicationId: '1019399324990976605', // (今回はこのIDを使用してください)
-      //     booksGenreId: '001'
-      //   },
-      // }).done(function(data) {
-      //   // この中にデータ取得後の動きを記述していきます。
-      // });
-      //
+
+      $(function() {
+        var searchText = '';
+        var hitsNum = 20;
+        //検索されたwordをkeyにして、そのvalueとしてそのwordが検索された回数とhtmlテキストを格納する配列の入ったオブジェクト
+        var booklistsData = {};
+        //最初の検索かどうかの判定
+        var nolistData = false;
+        // var doubleClickCheak;
+
+        $('#js-search-button').click(function() {
+          
+          addBookList();      
+          // getAjax();
+          $.ajax({
+            url: 'https://app.rakuten.co.jp/services/api/BooksTotal/Search/20130522',
+            type: 'GET',
+            datatype: 'json',
+            data: {
+              // 「区分:サービス固有パラメーター」を確認して、必要な情報をdata内に入れましょう。
+              hits: hitsNum,
+              page: booklistsData[searchText][0],
+              keyword: searchText,
+              applicationId: '1019399324990976605', // (今回はこのIDを使用してください)
+              booksGenreId: '001'
+            },
+          }).done(function(data) {
+            $(".lists, .message").empty();
+            if(data.count === 0) {
+              $('.error').html('<p class="message">検索結果が見つかりませんでした。<br>別のキーワードで検索して下さい。</p>');
+            } else {
+              $('.lists').html(addAppendText(data));
+            }
+          }).fail(function(XMLHttpRequest){
+            $(".lists, .message").empty();
+            showErrorMassage(XMLHttpRequest);
+          });
+
+        });
+
+
+
+
+        //booklistsDataを作成
+        var addBookList = function() {
+          searchText = $('#js-search-word').val();
+          console.log(booklistsData);
+
+          if (nolistData){
+            if (searchText in booklistsData != true){
+              console.log('ないよ');
+              booklistsData[searchText] = [1,'', true];
+            }
+          } else {
+            console.log('最初');
+            booklistsData[searchText] = [1,'', true];
+            nolistData = true;
+          }
+        }
+
+        //ajax
+        var getAjax = function() {
+          $.ajax({
+            url: 'https://app.rakuten.co.jp/services/api/BooksTotal/Search/20130522',
+            type: 'GET',
+            datatype: 'json',
+            data: {
+              // 「区分:サービス固有パラメーター」を確認して、必要な情報をdata内に入れましょう。
+              hits: hitsNum,
+              page: booklistsData[searchText][0],
+              keyword: searchText,
+              applicationId: '1019399324990976605', // (今回はこのIDを使用してください)
+              booksGenreId: '001'
+            },
+          }).done(function(data) {
+            $(".lists, .message").empty();
+            if(data.count === 0) {
+              $('.error').html('<p class="message">検索結果が見つかりませんでした。<br>別のキーワードで検索して下さい。</p>');
+            } else {
+              $('.lists').html(addAppendText(data));
+            }
+          }).fail(function(XMLHttpRequest){
+            $(".lists, .message").empty();
+            showErrorMassage(XMLHttpRequest);
+          });
+        };
+        
+
+        //検索された単語のに対してのhtml要素を作成し同じ単語に関してはhtml要素を追加
+        var addAppendText = function(data) {
+
+          var appendText = booklistsData[searchText][1];
+          var allItemNum = data.count;
+          var booksNum = data.Items.length;
+
+          if(booklistsData[searchText][2]) {
+            for(var i=0; i<booksNum; i++) {
+            var bookdata = data.Items[i].Item;
+
+            appendText = '<li class="lists__item">' + 
+              '<div class="lists__item__inner">' + 
+              '<a href="' + bookdata.itemUrl + '" class="lists__item__link" target="_blank">' + 
+              '<img src="' + bookdata.largeImageUrl +'" class="lists__item__img" alt="">' +
+              '<p class="lists__item__detail">作品名：' + bookdata.title + '</p>' + 
+              '<p class="lists__item__detail">作者　：' + bookdata.author + '</p>' + 
+              '<p class="lists__item__detail">出版社：' + bookdata.publisherName + '</p>' + 
+              '</a>' + 
+              '</div>' + 
+              '</li>' + appendText;
+            }
+          }
+          booklistsData[searchText][1] = appendText;
+
+          if(booksNum === hitsNum) {
+            booklistsData[searchText][0]++;
+          } else {
+            booklistsData[searchText][2] = false;
+          }
+          return appendText;
+        }
+
+        //エラーメッセージの表示
+        var showErrorMassage = function(XMLHttpRequest){
+
+          if(XMLHttpRequest.statusText == "error") {
+              $('.error').html('<p class="message">インターネットに繋がっていません</p>');
+            } else if(XMLHttpRequest.responseJSON.error_description == "keyword length must be over 2 characters"){
+              $('.error').html('<p class="message">2文字以上で検索してください</p>');
+            } else if(XMLHttpRequest.responseJSON.error_description == "number of allowed requests has been exceeded for this API. please try again soon."){
+              $('.error').html('<p class="message">リクエストが集中しています。<br>落ちついて検索してください</p>');
+            } else if(XMLHttpRequest.responseJSON.error_description == "keyword must be set") {
+              $('.error').html('<p class="message">入力欄に検索したい本のキーワードを入力してください</p>');
+          } 
+        }
+
+
+      });  
     </script>
   </body>
 </html>
